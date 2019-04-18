@@ -7,8 +7,8 @@ import random
 from pygame import *
 
 pygame.init()
-"""Sets screen dimensions, colors, sounds, and images.
-Also initializes time/score."""
+# Sets screen dimensions, colors, sounds, and images.
+# Also initializes time/score.
 scr_size = (width,height) = (600,150)
 FPS = 60
 gravity = 0.6
@@ -27,8 +27,8 @@ jump_sound = pygame.mixer.Sound('sprites/jump.wav')
 die_sound = pygame.mixer.Sound('sprites/die.wav')
 checkPoint_sound = pygame.mixer.Sound('sprites/checkPoint.wav')
 
-"""Next, it pulls the sprites to be able to construct the image
-we see on screen."""
+# Next, it pulls the sprites to be able to construct the image
+# we see on screen.
 
 def load_image(
     name,
@@ -90,8 +90,7 @@ def load_sprite_sheet(
 
     return sprites,sprite_rect
 
-"""Game over screen."""
-
+# Game over screen
 def disp_gameOver_msg(retbutton_image,gameover_image):
     retbutton_rect = retbutton_image.get_rect()
     retbutton_rect.centerx = width / 2
@@ -103,7 +102,8 @@ def disp_gameOver_msg(retbutton_image,gameover_image):
 
     screen.blit(retbutton_image, retbutton_rect)
     screen.blit(gameover_image, gameover_rect)
-"""I think this is the loading screen"""
+
+# I think this is the loading screen
 def extractDigits(number):
     if number > -1:
         digits = []
@@ -117,10 +117,11 @@ def extractDigits(number):
             digits.append(0)
         digits.reverse()
         return digits
-"""Our dino dude(ette). Initializes all of his stats such as life, score, movement,
-and jump speed. It also imports the images of the normal dino and the
-ducking dino.
-"""
+
+# Our dino dude(ette). Initializes all of his stats such as life, score, movement,
+# and jump speed. It also imports the images of the normal dino and the
+# ducking dino.
+
 class Dino():
     def __init__(self,sizex=-1,sizey=-1):
         self.images,self.rect = load_sprite_sheet('dino.png',5,1,sizex,sizey,-1)
@@ -140,8 +141,10 @@ class Dino():
 
         self.stand_pos_width = self.rect.width
         self.duck_pos_width = self.rect1.width
-"""Next it draws itself, checks its boundary, defines how to jump, and defines
-how to duck. Finally it checks if its dead. If it isn't, it increases the score."""
+
+# Next it draws itself, checks its boundary, defines how to jump, and defines
+# how to duck. Finally it checks if its dead. If it isn't, it increases the score.
+
     def draw(self):
         screen.blit(self.image,self.rect)
 
@@ -191,7 +194,8 @@ how to duck. Finally it checks if its dead. If it isn't, it increases the score.
                     checkPoint_sound.play()
 
         self.counter = (self.counter + 1)
-"""This defines the cactus! It puts a cactus randomly between 0 and 3"""
+
+# This defines the cactus! It puts a cactus randomly between 0 and 3
 class Cactus(pygame.sprite.Sprite):
     def __init__(self,speed=5,sizex=-1,sizey=-1):
         pygame.sprite.Sprite.__init__(self,self.containers)
@@ -209,8 +213,9 @@ class Cactus(pygame.sprite.Sprite):
 
         if self.rect.right < 0:
             self.kill()
-"""This defines a pyteradactol! These move so it establishes that along with a
-random height."""
+# This defines a pyteradactol! These move so it establishes that along with a
+# random height.
+
 class Ptera(pygame.sprite.Sprite):
     def __init__(self,speed=5,sizex=-1,sizey=-1):
         pygame.sprite.Sprite.__init__(self,self.containers)
@@ -235,7 +240,7 @@ class Ptera(pygame.sprite.Sprite):
         if self.rect.right < 0:
             self.kill()
 
-"""Yo, this defines the ground, image-wise and movement-wise."""
+# Yo, this defines the ground, image-wise and movement-wise.
 class Ground():
     def __init__(self,speed=-5):
         self.image,self.rect = load_image('ground.png',-1,-1,-1)
@@ -258,7 +263,8 @@ class Ground():
 
         if self.rect1.right < 0:
             self.rect1.left = self.rect.right
-"""Clouds just look pretty. They don't do anything."""
+
+# Clouds just look pretty. They don't do anything.
 class Cloud(pygame.sprite.Sprite):
     def __init__(self,x,y):
         pygame.sprite.Sprite.__init__(self,self.containers)
@@ -275,7 +281,8 @@ class Cloud(pygame.sprite.Sprite):
         self.rect = self.rect.move(self.movement)
         if self.rect.right < 0:
             self.kill()
-"""This defines the scoring? I'm a bit confused on this part"""
+
+# This defines the scoring? I'm a bit confused on this part
 class Scoreboard():
     def __init__(self,x=-1,y=-1):
         self.score = 0
@@ -350,9 +357,9 @@ def introscreen():
         clock.tick(FPS)
         if temp_dino.isJumping == False and temp_dino.isBlinking == False:
             gameStart = True
-"""Now we get to the meat of the game. It establishes the placement of the Dino,
-the movement of the ground, and all of the obstacles. Next it establishes the
-game screen."""
+# Now we get to the meat of the game. It establishes the placement of the Dino,
+# the movement of the ground, and all of the obstacles. Next it establishes the
+# game screen.
 def gameplay():
     global high_score
     gamespeed = 4
@@ -386,8 +393,8 @@ def gameplay():
     HI_image.blit(temp_images[11],temp_rect)
     HI_rect.top = height*0.1
     HI_rect.left = width*0.73
-"""Here, the code is for establishing jumping and ducking for the dino.
-"""
+
+# Here, the code is for establishing jumping and ducking for the dino.
     while not gameQuit:
         while startMenu:
             pass
@@ -417,9 +424,8 @@ def gameplay():
                     if event.type == pygame.KEYUP:
                         if event.key == pygame.K_DOWN:
                             playerDino.isDucking = False
-"""Now we establish the obstacles. If they hit one, the dino's state changes
-to dead. It populates the game with a random amount of cacti and pteras.
-"""
+# Now we establish the obstacles. If they hit one, the dino's state changes
+# to dead. It populates the game with a random amount of cacti and pteras.
 
             for c in cacti:
                 c.movement[0] = -1*gamespeed
@@ -453,7 +459,7 @@ to dead. It populates the game with a random amount of cacti and pteras.
 
             if len(clouds) < 5 and random.randrange(0,300) == 10:
                 Cloud(width,random.randrange(height/5,height/2))
-"""After this, it updates all of the states and draws the next screen."""
+# After this, it updates all of the states and draws the next screen.
             playerDino.update()
             cacti.update()
             pteras.update()
@@ -476,12 +482,12 @@ to dead. It populates the game with a random amount of cacti and pteras.
 
                 pygame.display.update()
             clock.tick(FPS)
-"""Checks if you died."""
+# Checks if you died.
             if playerDino.isDead:
                 gameOver = True
                 if playerDino.score > high_score:
                     high_score = playerDino.score
-"""If you didn't, after a certain point, it increases speed."""
+# If you didn't, after a certain point, it increases speed
             if counter%700 == 699:
                 new_ground.speed -= 1
                 gamespeed += 1
@@ -490,8 +496,8 @@ to dead. It populates the game with a random amount of cacti and pteras.
 
         if gameQuit:
             break
-"""End credit stuff.
-Allows you to quit the game and get back to the start screen""""
+# End credit stuff.
+# Allows you to quit the game and get back to the start screen
         while gameOver:
             if pygame.display.get_surface() == None:
                 print("Couldn't load display surface")
