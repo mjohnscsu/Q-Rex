@@ -484,6 +484,9 @@ def gameplay(agent):
                     # print("else", state_value)
                     agent.act_with_best_q(state_value)
                     t += 1
+            ### direct call to jump, no space press
+            if agent.action_idx == 1:
+                playerDino.jump()
             
             # if playerDino.rect.bottom != 147: print(playerDino.rect.bottom)
             # agent.act_with_best_q(state_value)
@@ -749,11 +752,12 @@ alpha = .5
 gamma = 0.8
 observe = 5
 agent_scores = []
-speedup = False
-max_cacti = 1
-spawn = False
 full = False
-max_score = 10
+speedup = full
+max_cacti = 1
+spawn = full
+e_table_decay = True
+max_score = 100
 
 
 adv_e_table += [epsilon, 1]
@@ -849,7 +853,7 @@ class GameState:
             tracking += 8
             # print("true ")
         if feature.nearest-scale*(gamespeed-4) < 3: tracking += 4
-        if feature.nearest-scale*(gamespeed-4) < 17: tracking +=2
+        if feature.nearest-scale*(gamespeed-4) < 16: tracking +=2
         if isjumping == True: tracking +=1
         return tracking
     
@@ -950,7 +954,8 @@ class Agent:
         
         
     def press_jump(self):
-        pag.press("space")
+        self.action_idx = 1
+        # pag.press("space")
         
     def get_actions(self, state):
         if state.bottom == 147: return [0,1]
@@ -960,7 +965,13 @@ class Agent:
         # print(epsilon_decay)
         state.nearest_on_screen = features.nearest_on_screen
         # print(state.nearest_on_screen)
-        if random.random() <= (epsilon_decay):
+        if e_table_decay == True: 
+            e_state = e_table[state_value][0]
+            e_table[state_value][0] /= (np.sqrt(e_table[self.state_value][1] + 1)/decay)
+            e_table[state_value][1] += 1
+        else: e_state = epsilon_decay
+        
+        if random.random() <= (e_state):
             self.action_idx = np.random.choice(self.actions)
             if self.action_idx == 1: 
                 self.press_jump()
@@ -981,9 +992,13 @@ class Agent:
         self.prev_state = self.state_value
         self.state_value = state.get_state(playerDino.rect.bottom, int(playerDino.movement[1]), playerDino.isJumping)
         
-        # e_state = adv_e_table[self.state_value][0]
+        if e_table_decay == True: 
+            e_state = adv_e_table[self.state_value][0]
+            adv_e_table[self.state_value][0] /= (np.sqrt(adv_e_table[self.state_value][1] + 1)/decay)
+            adv_e_table[self.state_value][1] += 1
+        else: e_state = e_decay
         
-        if random.random() <= e_decay:
+        if random.random() <= e_state:
             self.action_idx = np.random.choice(self.actions)
             if self.action_idx == 1: 
                 self.press_jump()
@@ -1028,25 +1043,26 @@ class Agent:
         
     
     def update_on_gameover(self, state, nearest, bottom, movement, isjumping, score, reset):
-        if score != reset:
-            if state.isfalling == True:
-                for i in range(len(self.state_action_log)-1, len(self.state_action_log)-21, -1):
-                    temp = self.state_action_log[i]
-                    adv_Q[temp[0]] += [-100,-100]
+        if full == False:
+            if score != reset:
+                if state.isfalling == True:
+                    for i in range(len(self.state_action_log)-1, len(self.state_action_log)-21, -1):
+                        temp = self.state_action_log[i]
+                        adv_Q[temp[0]] += [-100,-100]
+                else:
+                    for i in range(len(self.state_action_log)-1, len(self.state_action_log)-4, -1):
+                        temp = self.state_action_log[i]
+                        adv_Q[temp[0]] += [-100,-100]
+                state.nearest_on_screen = nearest
+                self.state_value = state.get_state(bottom, movement, isjumping)
+                adv_Q[self.state_value] = [-1000,-1000]
+                # adv_Q[self.prev_state] = [-1000, -1000]
+            
             else:
-                for i in range(len(self.state_action_log)-1, len(self.state_action_log)-4, -1):
-                    temp = self.state_action_log[i]
-                    adv_Q[temp[0]] += [-100,-100]
-            state.nearest_on_screen = nearest
-            self.state_value = state.get_state(bottom, movement, isjumping)
-            adv_Q[self.state_value] = [-1000,-1000]
-            # adv_Q[self.prev_state] = [-1000, -1000]
-        
-        else:
-            for i in range(len(self.state_action_log)):
-                    temp = self.state_action_log[i]
-                    adv_Q[temp[0]][temp[1]] += score/100
-                    
+                for i in range(len(self.state_action_log)):
+                        temp = self.state_action_log[i]
+                        adv_Q[temp[0]][temp[1]] += score/100
+                        
         self.action_log = []
                     
         
@@ -1061,8 +1077,8 @@ class Agent:
         
     def act_with_best_q(self, state_value):
         # self.action_idx = np.where(trained_Q[state_value,] == np.max(trained_Q[state_value,]))[0][0]
-        # self.action_idx = np.where(Q[state_value,] == np.max(Q[state_value,]))[0][0]
-        self.action_idx = np.where(adv_Q[state_value,] == np.max(adv_Q[state_value,]))[0][0]
+        if full == True: self.action_idx = np.where(Q[state_value,] == np.max(Q[state_value,]))[0][0]
+        else: self.action_idx = np.where(adv_Q[state_value,] == np.max(adv_Q[state_value,]))[0][0]
         if self.action_idx == 1: self.press_jump()
   
         
